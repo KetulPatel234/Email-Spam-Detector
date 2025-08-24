@@ -4,10 +4,12 @@ import imaplib
 import email
 import time
 import os
+import sys
 import joblib
 import logging
 import hashlib
 import threading
+import app
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -23,8 +25,17 @@ if not all([IMAP_SERVER, IMAP_PORT, EMAIL_ADDRESS, PASSWORD]):
 
 IMAP_PORT = int(IMAP_PORT)
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(current_dir, '..', 'model.pkl')
+
+if getattr(sys, 'frozen', False):
+    # When running as a bundled executable
+    base_path = sys._MEIPASS
+    model_path = os.path.join(base_path, 'app', 'model.pkl')
+else:
+    # When running in development
+    base_path = os.path.dirname(os.path.abspath(__file__))
+    model_path = os.path.join(base_path, '..', 'model.pkl')
+
+model_path = os.path.abspath(model_path)
 
 # Load the model using the constructed path
 spam_classifier = joblib.load(model_path)
@@ -91,11 +102,10 @@ def process_emails():
 
         for num in message_numbers:
             # Generate a unique hash for the email
-            email_hash = hashlib.sha256(num).hexdigest()
-
+            num_string = num.decode('utf-8')
             # Check if email is already in the database
-            if emails_collection.find_one({"_id": email_hash}):
-                # logging.info(f"Email with ID {email_hash[:8]} already in DB. Skipping.")
+            if emails_collection.find_one({"_id": num_string}):
+                # logging.info(f"Email with ID {num_string[:8]} already in DB. Skipping.")
                 continue
 
             try:
@@ -105,6 +115,12 @@ def process_emails():
 
                 # Get subject and body
                 subject = decode_subject(email_message["Subject"])
+                print("*"*20)
+                print(subject)
+                print("*"*20)
+                mail_date = email_message["Date"]
+                sender = email_message["From"]
+
                 body = ""
                 if email_message.is_multipart():
                     for part in email_message.walk():
@@ -119,24 +135,30 @@ def process_emails():
                     process_spam(mail, num, subject)
                     # Insert email into DB after processing
                     email_doc = {
-                        "_id": email_hash,
+                        "_id": num_string,
                         "subject": subject,
                         "body": body,
+                        "sender": sender,
                         "is_spam": True,
+                        "is_undone": False,
+                        "mail_date": mail_date,
                         "processed_at": time.time()
                     }
                 else:
-                    mail.store(num, "-FLAGS", "\\Seen")
                     logging.info(f"Processed email: {subject}")
                     # Insert email into DB
                     email_doc = {
-                        "_id": email_hash,
+                        "_id": num_string,
                         "subject": subject,
                         "body": body,
+                        "sender": sender,
                         "is_spam": False,
+                        "is_undone": False,
+                        "mail_date": mail_date,
                         "processed_at": time.time()
                     }
 
+                mail.store(num, "-FLAGS", "\\Seen")
                 emails_collection.insert_one(email_doc)
             
             except Exception as e:
@@ -174,10 +196,3 @@ def run():
     # The main thread can continue to run or just wait
     # In a Flask app, this would be where app.run() is called.
     logging.info("Email checker thread started. Main application running...")
-        
-    # Keep the main thread alive to prevent the daemon thread from exiting
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        logging.info("Application shut down.")
