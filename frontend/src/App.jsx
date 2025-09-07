@@ -1,6 +1,5 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Dashboard from './pages/Dashboard';
 import SpamManager from './pages/SpamManager';
 
 const App = () => {
@@ -8,8 +7,8 @@ const App = () => {
     <BrowserRouter>
       <div className="bg-gray-50 min-h-screen">
         <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/spam-manager" element={<SpamManager />} />
+          {/* <Route path="/" element={<Dashboard />} /> */}
+          <Route path="/" element={<SpamManager />} />
         </Routes>
       </div>
     </BrowserRouter>

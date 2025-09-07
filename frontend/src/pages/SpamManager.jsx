@@ -2,66 +2,12 @@ import React, { useEffect, useState } from "react";
 import Modal from "react-modal";
 import { User, Search, Filter, Calendar, Mail, X, Home, RotateCcw, CheckCircle, List, ArrowDownWideNarrow, ArrowUpWideNarrow } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 Modal.setAppElement('#root');
 
 function SpamManager() {
-
-  // Dummy data for 50 rows.
-  const initialMails = [
-    { "mail_id": 31, "sender": "Tech Support", "subject": "URGENT: Your Mac Has a Virus", "date": "2024-07-21", "isUndone": false },
-    { "mail_id": 32, "sender": "Fashion Outlet", "subject": "New Summer Collection is Here!", "date": "2024-07-20", "isUndone": true },
-    { "mail_id": 33, "sender": "Phishing Scam", "subject": "Unauthorized Transaction on Your Credit Card", "date": "2024-07-19", "isUndone": false },
-    { "mail_id": 34, "sender": "Travel Deals Inc.", "subject": "Last Minute Cruise Offers", "date": "2024-07-18", "isUndone": true },
-    { "mail_id": 35, "sender": "Health & Fitness", "subject": "Get Your Free Workout Plan!", "date": "2024-07-17", "isUndone": false },
-    { "mail_id": 36, "sender": "Financial Services", "subject": "Exclusive: Low Interest Rate Loan", "date": "2024-07-16", "isUndone": false },
-    { "mail_id": 37, "sender": "Unsubscribe From Our List", "subject": "Important: Your Subscription Will Expire", "date": "2024-07-15", "isUndone": false },
-    { "mail_id": 38, "sender": "Crypto Exchange", "subject": "Your Portfolio is Down, Invest Now", "date": "2024-07-14", "isUndone": true },
-    { "mail_id": 39, "sender": "Spammy Promotions Inc.", "subject": "Amazing Gadgets at 90% Off", "date": "2024-07-13", "isUndone": false },
-    { "mail_id": 40, "sender": "Job Offer", "subject": "High Paying Job! No Experience Needed", "date": "2024-07-12", "isUndone": false },
-    { "mail_id": 41, "sender": "Phishing Scam", "subject": "Account Verification Required", "date": "2024-07-11", "isUndone": false },
-    { "mail_id": 42, "sender": "Dating Service", "subject": "Find Your Match Today!", "date": "2024-07-10", "isUndone": false },
-    { "mail_id": 43, "sender": "Lottery Winner", "subject": "You've Been Selected to Win a New Car!", "date": "2024-07-09", "isUndone": true },
-    { "mail_id": 44, "sender": "Spammy Promotions Inc.", "subject": "Don't Miss Out on This!", "date": "2024-07-08", "isUndone": false },
-    { "mail_id": 45, "sender": "Health Supplement", "subject": "Boost Your Energy with This Pill", "date": "2024-07-07", "isUndone": false },
-    { "mail_id": 46, "sender": "Online Survey", "subject": "Win a $1000 Amazon Gift Card", "date": "2024-07-06", "isUndone": true },
-    { "mail_id": 47, "sender": "Nigerian Prince", "subject": "Your Help Is Needed", "date": "2024-07-05", "isUndone": false },
-    { "mail_id": 48, "sender": "Discount Store", "subject": "Huge Clearance Sale!", "date": "2024-07-04", "isUndone": false },
-    { "mail_id": 49, "sender": "Crypto Exchange", "subject": "Get Free Crypto", "date": "2024-07-03", "isUndone": false },
-    { "mail_id": 50, "sender": "Unsubscribe From Our List", "subject": "Your Email has been Registered to All", "date": "2024-07-02", "isUndone": false },
-    { "mail_id": 51, "sender": "Financial Services", "subject": "Get a New Credit Card Today", "date": "2024-07-01", "isUndone": false },
-    { "mail_id": 52, "sender": "Job Offer", "subject": "Work from Anywhere", "date": "2024-06-30", "isUndone": true },
-    { "mail_id": 53, "sender": "Weight Loss Clinic", "subject": "Lose Weight with our Product", "date": "2024-06-29", "isUndone": false },
-    { "mail_id": 54, "sender": "Spammy Promotions Inc.", "subject": "Unbelievable Deals Inside", "date": "2024-06-28", "isUndone": false },
-    { "mail_id": 55, "sender": "Phishing Scam", "subject": "Your Password Has Been Changed", "date": "2024-06-27", "isUndone": false },
-    { "mail_id": 56, "sender": "Online Casino", "subject": "New Games and Bonuses!", "date": "2024-06-26", "isUndone": true },
-    { "mail_id": 57, "sender": "Dating Service", "subject": "Your Profile Has New Visitors", "date": "2024-06-25", "isUndone": false },
-    { "mail_id": 58, "sender": "Health Supplement", "subject": "The Secret to Better Health", "date": "2024-06-24", "isUndone": false },
-    { "mail_id": 59, "sender": "Lottery Winner", "subject": "Final Notice: Claim Your Prize", "date": "2024-06-23", "isUndone": false },
-    { "mail_id": 60, "sender": "Discount Store", "subject": "Clearance on All Electronics", "date": "2024-06-22", "isUndone": true },
-    { "mail_id": 61, "sender": "Online Survey", "subject": "Your Feedback is Needed for a Reward", "date": "2024-06-21", "isUndone": false },
-    { "mail_id": 62, "sender": "Nigerian Prince", "subject": "Please Help Me Transfer Funds", "date": "2024-06-20", "isUndone": false },
-    { "mail_id": 63, "sender": "Tech Support", "subject": "Your Computer's Security is Low", "date": "2024-06-19", "isUndone": false },
-    { "mail_id": 64, "sender": "Fashion Outlet", "subject": "Sale on All Tops", "date": "2024-06-18", "isUndone": true },
-    { "mail_id": 65, "sender": "Phishing Scam", "subject": "Your Account Has Been Compromised", "date": "2024-06-17", "isUndone": false },
-    { "mail_id": 66, "sender": "Travel Deals Inc.", "subject": "Explore The World!", "date": "2024-06-16", "isUndone": false },
-    { "mail_id": 67, "sender": "Health & Fitness", "subject": "Join Our Exclusive Gym", "date": "2024-06-15", "isUndone": false },
-    { "mail_id": 68, "sender": "Financial Services", "subject": "Get a Free Financial Consultation", "date": "2024-06-14", "isUndone": true },
-    { "mail_id": 69, "sender": "Unsubscribe From Our List", "subject": "Urgent: Unsubscribe Now", "date": "2024-06-13", "isUndone": false },
-    { "mail_id": 70, "sender": "Crypto Exchange", "subject": "Trade Crypto for Profit", "date": "2024-06-12", "isUndone": false },
-    { "mail_id": 71, "sender": "Spammy Promotions Inc.", "subject": "Limited Offer on All Products", "date": "2024-06-11", "isUndone": false },
-    { "mail_id": 72, "sender": "Job Offer", "subject": "Hiring Now", "date": "2024-06-10", "isUndone": true },
-    { "mail_id": 73, "sender": "Phishing Scam", "subject": "Your Account is Under Review", "date": "2024-06-09", "isUndone": false },
-    { "mail_id": 74, "sender": "Dating Service", "subject": "Someone wants to Chat!", "date": "2024-06-08", "isUndone": false },
-    { "mail_id": 75, "sender": "Lottery Winner", "subject": "You're a Lottery Winner!", "date": "2024-06-07", "isUndone": false },
-    { "mail_id": 76, "sender": "Spammy Promotions Inc.", "subject": "Flash Sale!", "date": "2024-06-06", "isUndone": true },
-    { "mail_id": 77, "sender": "Health Supplement", "subject": "Look Younger", "date": "2024-06-05", "isUndone": false },
-    { "mail_id": 78, "sender": "Online Survey", "subject": "Quick Survey for a Gift Card", "date": "2024-06-04", "isUndone": false },
-    { "mail_id": 79, "sender": "Nigerian Prince", "subject": "A New Opportunity Awaits", "date": "2024-06-03", "isUndone": false },
-    { "mail_id": 80, "sender": "Discount Store", "subject": "New Daily Deals", "date": "2024-06-02", "isUndone": true }
-  ];
-
-  const [allMails, setAllMails] = useState(initialMails);
+  const [allMails, setAllMails] = useState([]);
   const [displayedMails, setDisplayedMails] = useState([]);
   const [sender, setSender] = useState("");
   const [subject, setSubject] = useState("");
@@ -72,83 +18,109 @@ function SpamManager() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [filterTrigger, setFilterTrigger] = useState(0);
 
-  const [sortColumn, setSortColumn] = useState(null);
-  const [sortDirection, setSortDirection] = useState(null);
+  const [sortColumn, setSortColumn] = useState("mail_date");
+  const [sortDirection, setSortDirection] = useState("desc");
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalFilteredMails, setTotalFilteredMails] = useState(initialMails.length);
+  const [totalFilteredMails, setTotalFilteredMails] = useState();
   const itemsPerPage = 8;
   const totalPages = Math.ceil(totalFilteredMails / itemsPerPage);
 
   const navigate = useNavigate();
 
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString();
+  };
+
+  const fetchSpamMails = async () => {
+    setLoading(true);
+    try {
+      const response = await axios.get('/api/mails');
+      return response.data.data;
+    } catch (err) {
+      console.error("Error fetching mails:", err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
   useEffect(() => {
-    document.title = "Spam Manager";
+    (async () => {
+      let newMails = await fetchSpamMails();
+      setAllMails(newMails);
+    })();
   }, []);
 
   useEffect(() => {
     setLoading(true);
-    const timeoutId = setTimeout(() => {
-      let filteredMails = allMails.filter(mail =>
-        (!sender || (mail.sender && mail.sender.toLowerCase().includes(sender.toLowerCase()))) &&
-        (!subject || (mail.subject && mail.subject.toLowerCase().includes(subject.toLowerCase())))
-      );
+    let filteredMails = allMails.filter(mail =>
+      (!sender || (mail.sender && mail.sender.toLowerCase().includes(sender.toLowerCase()))) &&
+      (!subject || (mail.subject && mail.subject.toLowerCase().includes(subject.toLowerCase())))
+    );
 
-      // Status filtering logic
-      if (statusFilter === "spam") {
-        filteredMails = filteredMails.filter(mail => !mail.isUndone);
-      } else if (statusFilter === "undone") {
-        filteredMails = filteredMails.filter(mail => mail.isUndone);
-      }
+    if (statusFilter === "spam") {
+      filteredMails = filteredMails.filter(mail => mail.is_spam && !mail.is_undone);
+    } else if (statusFilter === "undone") {
+      filteredMails = filteredMails.filter(mail => mail.is_undone);
+    } else if (statusFilter === "non-spam") {
+      filteredMails = filteredMails.filter(mail => !mail.is_spam && !mail.is_undone);
+    }
 
-      // Date filtering logic
-      if (startDate && endDate) {
-        filteredMails = filteredMails.filter(mail => {
-          const mailDate = new Date(mail.date);
-          const start = new Date(startDate);
-          const end = new Date(endDate);
-          return mailDate >= start && mailDate <= end;
-        });
-      }
+    // Date filtering logic
+    if (startDate && endDate) {
+      filteredMails = filteredMails.filter(mail => {
+        const mailDate = new Date(mail.mail_date);
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return mailDate >= start && mailDate <= end;
+      });
+    }
 
-      // Sorting logic
-      if (sortColumn) {
-        filteredMails.sort((a, b) => {
-          const aValue = a[sortColumn];
-          const bValue = b[sortColumn];
+    // Sorting logic
+    if (sortColumn) {
+      filteredMails.sort((a, b) => {
+        if (sortColumn === 'mail_date') {
+          const dateA = new Date(a.mail_date);
+          const dateB = new Date(b.mail_date);
+          return sortDirection === 'asc' ? dateA - dateB : dateB - dateA;
+        }
+        const aValue = a[sortColumn];
+        const bValue = b[sortColumn];
 
-          if (aValue < bValue) {
-            return sortDirection === 'asc' ? -1 : 1;
-          }
-          if (aValue > bValue) {
-            return sortDirection === 'asc' ? 1 : -1;
-          }
-          return 0;
-        });
-      }
+        if (aValue < bValue) {
+          return sortDirection === 'asc' ? -1 : 1;
+        }
+        if (aValue > bValue) {
+          return sortDirection === 'asc' ? 1 : -1;
+        }
+        return 0;
+      });
+    }
 
-      setTotalFilteredMails(filteredMails.length);
-      const start = (currentPage - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      setDisplayedMails(filteredMails.slice(start, end));
-      setLoading(false);
-    }, 500);
+    setTotalFilteredMails(filteredMails.length);
+    const start = (currentPage - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    setDisplayedMails(filteredMails.slice(start, end));
+    setLoading(false);
 
-    return () => clearTimeout(timeoutId);
   }, [allMails, sender, subject, statusFilter, filterTrigger, currentPage, sortColumn, sortDirection]);
 
   /**
    * Handles the "undo" action for a specific mail.
    */
-  const handleUndo = async (mail_id) => {
+  const handleUndo = async (subject, date, mail_id) => {
     setLoading(true);
     try {
-      console.log(`Simulating undo for mail_id: ${mail_id}`);
-      await new Promise(resolve => setTimeout(resolve, 500));
-
+      await axios.put(`/api/mails/undo`, { subject, date, mail_id });
       const newAllMails = allMails.map(mail =>
-        mail.mail_id === mail_id ? { ...mail, isUndone: true } : mail
+        mail._id === mail_id ? { ...mail, is_spam: true } : mail
       );
+      (async () => {
+        let newMails = await fetchSpamMails();
+        setAllMails(newMails);
+      })();
       setAllMails(newAllMails);
       setFilterTrigger(prev => prev + 1);
     } catch (err) {
@@ -253,10 +225,6 @@ function SpamManager() {
 
           <div className="flex items-center justify-between mb-8 pb-4 border-b border-gray-700">
             <h2 className="font-extrabold text-3xl text-gray-100">Spam Mails Management</h2>
-            <span className="inline-block relative bg-blue-700 text-blue-100 font-medium px-4 py-2 rounded-full text-sm shadow-md">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75 top-0 left-0"></span>
-              Live
-            </span>
           </div>
 
           <form className="mb-8">
@@ -292,6 +260,7 @@ function SpamManager() {
                   <option value="all">All Mails</option>
                   <option value="spam">Spam Mails</option>
                   <option value="undone">Undone Mails</option>
+                  <option value="non-spam">Non Spam Mails</option>
                 </select>
               </div>
               <div className="w-full md:w-auto">
@@ -355,12 +324,6 @@ function SpamManager() {
                 <tr className="border-b border-gray-600 text-gray-400 font-medium">
                   <th
                     className="py-4 px-6 text-left cursor-pointer"
-                    onClick={() => handleSort('mail_id')}
-                  >
-                    Mail ID {getSortIcon('mail_id')}
-                  </th>
-                  <th
-                    className="py-4 px-6 text-left cursor-pointer"
                     onClick={() => handleSort('sender')}
                   >
                     Sender {getSortIcon('sender')}
@@ -404,23 +367,24 @@ function SpamManager() {
                 ) : (
                   displayedMails
                     .map(mail => (
-                      <tr key={mail.mail_id} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700 transition-colors">
-                        <td className="py-3 px-6 text-gray-400">{mail.mail_id}</td>
+                      <tr key={mail._id} className="border-b border-gray-700 last:border-b-0 hover:bg-gray-700 transition-colors">
                         <td className="py-3 px-6 font-semibold text-gray-300">{mail.sender}</td>
                         <td className="py-3 px-6 text-gray-400">{mail.subject}</td>
-                        <td className="py-3 px-6 text-gray-500">{mail.date}</td>
+                        <td className="py-3 px-6 text-gray-500">{formatDate(mail.mail_date)}</td>
                         <td className="py-3 px-6">
-                          {mail.isUndone ? (
-                            <span className="inline-block bg-gray-700 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Undone</span>
-                          ) : (
+                          {!mail.is_spam && !mail.is_undone ? (
+                            <span className="inline-block bg-gray-700 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Non Spam</span>
+                          ) : !mail.is_undone ? (
                             <span className="inline-block bg-gray-700 text-red-300 px-3 py-1 rounded-full text-xs font-semibold">Spam</span>
+                          ): (
+                            <span className="inline-block bg-gray-700 text-purple-300 px-3 py-1 rounded-full text-xs font-semibold">Undone</span>
                           )}
                         </td>
                         <td className="py-3 px-6">
-                          {!mail.isUndone && (
+                          {!mail.is_undone && mail.is_spam && (
                             <button
                               className="bg-blue-900 hover:bg-blue-800 text-blue-300 font-medium px-4 py-2 rounded-full text-xs flex items-center gap-1 transition-colors cursor-pointer"
-                              onClick={() => handleUndo(mail.mail_id)}
+                              onClick={() => handleUndo(mail.subject, mail.mail_date, mail._id)}
                               title="Move back to Inbox"
                             >
                               <RotateCcw size={14} />
@@ -478,21 +442,12 @@ function SpamManager() {
 
         <div className="lg:col-span-2">
           <div className="flex flex-col gap-8">
-            <button
-              type="button"
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-2xl shadow-lg border border-blue-500 transition-all transform hover:scale-105 duration-300 flex items-center justify-center gap-2 cursor-pointer"
-              onClick={() => navigate("/")}
-            >
-              <Home size={24} />
-              Home
-            </button>
-
             <div className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 h-40 transition-transform transform hover:translate-y-[-5px] duration-300">
               <div className="flex items-center justify-between mb-4">
                 <span className="text-sm font-semibold text-gray-400">TOTAL DETECTED SPAM</span>
                 <Mail className="h-6 w-6 text-blue-500" />
               </div>
-              <p className="text-4xl font-extrabold text-blue-300">{initialMails.length}</p>
+              <p className="text-4xl font-extrabold text-blue-300">{allMails.length}</p>
             </div>
 
             <div className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 h-40 transition-transform transform hover:translate-y-[-5px] duration-300">
@@ -500,7 +455,7 @@ function SpamManager() {
                 <span className="text-sm font-semibold text-gray-400">REMAINING SPAM MAILS</span>
                 <X className="h-6 w-6 text-red-400" />
               </div>
-              <p className="text-4xl font-extrabold text-red-400">{allMails.filter(mail => !mail.isUndone).length}</p>
+              <p className="text-4xl font-extrabold text-red-400">{allMails.filter(mail => mail.is_spam && !mail.is_undone).length}</p>
             </div>
 
             <div className="bg-gray-800 p-6 rounded-2xl shadow-xl border border-gray-700 h-40 transition-transform transform hover:translate-y-[-5px] duration-300">
@@ -508,7 +463,7 @@ function SpamManager() {
                 <span className="text-sm font-semibold text-gray-400">UNDONE</span>
                 <CheckCircle className="h-6 w-6 text-purple-400" />
               </div>
-              <p className="text-4xl font-extrabold text-purple-400">{allMails.filter(mail => mail.isUndone).length}</p>
+              <p className="text-4xl font-extrabold text-purple-400">{allMails.filter(mail => mail.is_undone).length}</p>
             </div>
           </div>
         </div>

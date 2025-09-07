@@ -16,7 +16,7 @@ from sklearn.pipeline import Pipeline
 # Library used for saving the model
 import joblib
 
-df = pd.read_csv("./data/spam.csv", encoding='ISO-8859-1')
+df = pd.read_csv("../data/spam.csv", encoding='ISO-8859-1')
 
 df.dropna(inplace=True)
 
@@ -31,6 +31,10 @@ clf = Pipeline([
 ])
 
 clf.fit(X_train, y_train)
+
+# Calculate accuracy on the test set
+accuracy = clf.score(X_test, y_test)
+print(f"Test Set Accuracy: {accuracy * 100:.2f}%")
 
 def detect_spam(email_text):
     prediction = clf.predict([email_text])
@@ -102,4 +106,4 @@ for i, email in enumerate(test_emails, 1):
 print(f"Correct Predictions: {correct_predictions} out of {len(test_emails)}")
 
 # Save the model to a file
-joblib.dump(clf, 'model.pkl')
+joblib.dump(clf, 'model1.pkl')
